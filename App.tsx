@@ -70,7 +70,7 @@ function App(): JSX.Element {
   const [permission] = Camera.useCameraPermissions();
   const [micPermission] = Camera.useMicrophonePermissions();
 
-  const [openCamera, SetOpenCamera] = useState(false);
+  const [openCamera, SetOpenCamera] = useState(true);
   const [lastPhotoURI, setLastPhotoURI] = useState(null);
   const [lastVideoURI, setLastVideoURI] = useState('');
 
