@@ -1,4 +1,10 @@
 {
+  "expo": {
+    "plugins": [
+      "@config-plugins/ffmpeg-kit-react-native",
+      "expo-build-properties"
+    ]
+  },
   "name": "expoCamera",
   "displayName": "expoCamera"
 }

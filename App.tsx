@@ -10,6 +10,8 @@ import React, {useEffect, useRef, useState} from 'react';
 import type {PropsWithChildren} from 'react';
 import {
   Dimensions,
+  Image,
+  NativeModules,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -35,7 +37,12 @@ import {Camera, CameraType} from 'expo-camera';
 import Constants from 'expo-constants';
 console.log('expo-constants', Constants.systemFonts);
 
-import {Image, Video} from 'react-native-compressor';
+import {Image as ImageCompressor, Video} from 'react-native-compressor';
+import {FFmpegKit, ReturnCode} from 'ffmpeg-kit-react-native';
+
+import RNFS, {copyFile} from 'react-native-fs';
+
+import {zip} from 'react-native-zip-archive';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -60,8 +67,6 @@ function App(): JSX.Element {
   const [openCamera, SetOpenCamera] = useState(false);
   const [lastPhotoURI, setLastPhotoURI] = useState(null);
   const [lastVideoURI, setLastVideoURI] = useState('');
-
-  var uriList: Array<string> = [''];
 
   const isOpenCamera = useRef(false);
 
@@ -124,7 +129,104 @@ function App(): JSX.Element {
       let photo = await cameraRef.current.recordAsync();
       console.log('视频地址', photo.uri);
 
-      compressionVideoUri(photo.uri);
+      // compressionVideoUri(photo.uri);
+      const result = photo.uri;
+      setLastVideoURI(result);
+      openCameraShow();
+      startVideo(result);
+      getVideoFps(result);
+    }
+  };
+
+  const [imgUri, setImgUri] = useState('');
+  const [imgUri1, setImgUri1] = useState('');
+  var imgPath = '';
+  var imgPath1 = '';
+  //获取视频帧
+  const getVideoFps = async (uri: string) => {
+    NativeModules.MyNativeModule.getFilePath(
+      Math.random() * 1000 + '1234.jpg',
+      result => {
+        imgPath = result;
+        console.log('视频帧地址android ', imgPath);
+        getfps1(uri);
+      },
+    );
+  };
+
+  const getfps1 = async (uri: string) => {
+    NativeModules.MyNativeModule.getFilePath(
+      Math.random() + '1234.jpg',
+      result => {
+        imgPath1 = result;
+        console.log('视频帧地址android ', imgPath1);
+
+        FFmpegKit.executeAsync(
+          `-i ${uri} -ss 00:00:01 -vframes 1  ${imgPath} -ss 00:00:03 -vframes 1 ${imgPath1}`,
+          async session => {
+            const returnCode = await session.getReturnCode();
+            console.log('视频帧 returnCode ', returnCode);
+            if (ReturnCode.isSuccess(returnCode)) {
+              // SUCCESS
+              console.log('视频帧 成功');
+              setImgUri('file://' + imgPath);
+              setImgUri1('file://' + imgPath1);
+              const sourceFiles = [uri, imgPath, imgPath1];
+              moveFile(sourceFiles);
+            } else if (ReturnCode.isCancel(returnCode)) {
+              // CANCEL
+            } else {
+              // ERROR
+            }
+          },
+        );
+      },
+    );
+  };
+
+  const moveFile = async (sourceFiles: Array<string>) => {
+    try {
+      const now = new Date();
+      const timestamp = now.getTime();
+      const copyToFile = RNFS.CachesDirectoryPath + '/upload/' + timestamp;
+      var copyFileNum = 0;
+      await RNFS.mkdir(copyToFile);
+      sourceFiles.forEach(async file => {
+        console.log('待复制文件名称 ', file);
+        const fileName = file.split('/').pop();
+        console.log('复制文件到 ', fileName);
+        await copyFile(file, copyToFile + '/' + fileName)
+          .then(() => {
+            console.log('复制文件成功 FILE DELETED');
+            copyFileNum++;
+            if (sourceFiles.length == copyFileNum) {
+              console.log('复制成功');
+              zipFile(RNFS.CachesDirectoryPath + '/upload/' + timestamp);
+            }
+          })
+          // `unlink` will throw an error, if the item to unlink does not exist
+          .catch(err => {
+            console.log('复制文件失败 ', err.message);
+            moveFile(sourceFiles);
+          });
+      });
+    } catch (error) {
+      console.error('复制文件失败 Error compressing folder:', error);
+    }
+  };
+
+  const zipFile = async (file: string) => {
+    try {
+      const desPath = file + '.zip';
+      await zip(file, desPath)
+        .then(path => {
+          console.log(`压缩成功 zip completed at ${path}`);
+        })
+        .catch(error => {
+          console.error('压缩失败', error);
+        });
+    } catch (error) {
+      console.error('压缩失败 Error compressing folder:', error);
     }
   };
 
@@ -146,14 +248,15 @@ function App(): JSX.Element {
       },
     );
     console.log('压缩视频', result);
-    uriList.push(result);
+
     setLastVideoURI(result);
     openCameraShow();
     startVideo(result);
+    getVideoFps(result);
   };
 
   const compressionUri = async (uri: string) => {
-    const result = await Image.compress(uri, {
+    const result = await ImageCompressor.compress(uri, {
       compressionMethod: 'auto',
     });
     console.log('压缩图片', result);
@@ -237,12 +340,15 @@ function App(): JSX.Element {
   return (
     <View style={[backgroundStyle, styles.view]}>
       {openCamera ? (
-        <Camera
-          style={styles.camera}
-          type={type}
-          ref={cameraRef}
-          onMountError={onMountError}
-          onCameraReady={onCameraReady}>
+        <View style={styles.view}>
+          <Camera
+            style={styles.camera}
+            type={type}
+            ref={cameraRef}
+            onMountError={onMountError}
+            onCameraReady={onCameraReady}
+          />
+
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={openCameraShow}>
               <Text style={styles.text}>Close Camera</Text>
@@ -293,7 +399,7 @@ function App(): JSX.Element {
               </Text>
             </TouchableOpacity>
           </View>
-        </Camera>
+        </View>
       ) : (
         <View style={styles.view}>
           <TouchableOpacity
@@ -316,6 +422,24 @@ function App(): JSX.Element {
             useNativeControls
             resizeMode={ResizeMode.CONTAIN}
             isLooping={false}
+          />
+          <Image
+            style={{
+              height: 150,
+              width: 200,
+              backgroundColor: '#f0f0f0',
+              alignSelf: 'center',
+            }}
+            source={{uri: imgUri}}
+          />
+          <Image
+            style={{
+              height: 150,
+              width: 200,
+              backgroundColor: '#f0f0f0',
+              alignSelf: 'center',
+            }}
+            source={{uri: imgUri1}}
           />
         </View>
       )}
@@ -343,7 +467,7 @@ const styles = StyleSheet.create({
   },
   video: {
     alignSelf: 'center',
-    backgroundColor: 'blue',
+    backgroundColor: '#f0f0f0',
     width: 320,
     height: 200,
   },
