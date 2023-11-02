@@ -6,9 +6,10 @@
  * @format
  */
 
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState, Component} from 'react';
 import type {PropsWithChildren} from 'react';
 import {
+  Button,
   Dimensions,
   Image,
   NativeModules,
@@ -43,6 +44,11 @@ import {FFmpegKit, ReturnCode} from 'ffmpeg-kit-react-native';
 import RNFS, {copyFile} from 'react-native-fs';
 
 import {zip} from 'react-native-zip-archive';
+
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {NavigationContainer} from '@react-navigation/native';
+
+const Stack = createNativeStackNavigator();
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -337,112 +343,140 @@ function App(): JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  return (
-    <View style={[backgroundStyle, styles.view]}>
-      {openCamera ? (
-        <View style={styles.view}>
-          <Camera
-            style={styles.camera}
-            type={type}
-            ref={cameraRef}
-            onMountError={onMountError}
-            onCameraReady={onCameraReady}
-          />
+  function camera({navigation}) {
+    return (
+      <View style={[backgroundStyle, styles.view]}>
+        {openCamera ? (
+          <View style={styles.view}>
+            <Camera
+              style={styles.camera}
+              type={type}
+              ref={cameraRef}
+              onMountError={onMountError}
+              onCameraReady={onCameraReady}
+            />
 
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button} onPress={openCameraShow}>
-              <Text style={styles.text}>Close Camera</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
-              <Text style={styles.text}>Flip Camera</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                alignItems: 'center',
-                justifyContent: 'center',
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.button} onPress={openCameraShow}>
+                <Text style={styles.text}>Close Camera</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={toggleCameraType}>
+                <Text style={styles.text}>Flip Camera</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  alignItems: 'center',
+                  justifyContent: 'center',
 
-                marginTop: 10,
-              }}
-              onPress={() => {
-                takePhoto();
-              }}>
-              <Text style={{fontSize: 30, color: 'blue', alignSelf: 'center'}}>
-                📸拍照
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                alignItems: 'center',
-                justifyContent: 'center',
+                  marginTop: 10,
+                }}
+                onPress={() => {
+                  takePhoto();
+                }}>
+                <Text
+                  style={{fontSize: 30, color: 'blue', alignSelf: 'center'}}>
+                  📸拍照
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  alignItems: 'center',
+                  justifyContent: 'center',
 
-                marginTop: 10,
-              }}
-              onPress={() => {
-                takeVideo();
-              }}>
-              <Text style={{fontSize: 30, color: 'blue', alignSelf: 'center'}}>
-                📸录像
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                alignItems: 'center',
-                justifyContent: 'center',
+                  marginTop: 10,
+                }}
+                onPress={() => {
+                  takeVideo();
+                }}>
+                <Text
+                  style={{fontSize: 30, color: 'blue', alignSelf: 'center'}}>
+                  📸录像
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  alignItems: 'center',
+                  justifyContent: 'center',
 
-                marginTop: 10,
-              }}
-              onPress={() => {
-                stopVideo();
-              }}>
-              <Text style={{fontSize: 30, color: 'blue', alignSelf: 'center'}}>
-                停止录像
-              </Text>
-            </TouchableOpacity>
+                  marginTop: 10,
+                }}
+                onPress={() => {
+                  stopVideo();
+                }}>
+                <Text
+                  style={{fontSize: 30, color: 'blue', alignSelf: 'center'}}>
+                  停止录像
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      ) : (
-        <View style={styles.view}>
-          <TouchableOpacity
-            style={styles.buttonCenter}
-            onPress={openCameraShow}>
-            <Text style={styles.text}>Open Camera</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonCenter} onPress={startVideo}>
-            <Text style={styles.text}>播放视频</Text>
-          </TouchableOpacity>
-          <VideoAv
-            ref={videoAv}
-            source={{uri: lastVideoURI}}
-            style={styles.video}
-            onLoadStart={_onLoadStart}
-            onLoad={_onLoad}
-            onError={_onError}
-            onFullscreenUpdate={_onFullscreenUpdate}
-            onReadyForDisplay={_onReadyForDisplay}
-            useNativeControls
-            resizeMode={ResizeMode.CONTAIN}
-            isLooping={false}
-          />
-          <Image
-            style={{
-              height: 150,
-              width: 200,
-              backgroundColor: '#f0f0f0',
-              alignSelf: 'center',
-            }}
-            source={{uri: imgUri}}
-          />
-          <Image
-            style={{
-              height: 150,
-              width: 200,
-              backgroundColor: '#f0f0f0',
-              alignSelf: 'center',
-            }}
-            source={{uri: imgUri1}}
-          />
-        </View>
-      )}
+        ) : (
+          <View style={styles.view}>
+            <TouchableOpacity
+              style={styles.buttonCenter}
+              onPress={openCameraShow}>
+              <Text style={styles.text}>Open Camera</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.buttonCenter} onPress={startVideo}>
+              <Text style={styles.text}>播放视频</Text>
+            </TouchableOpacity>
+            <VideoAv
+              ref={videoAv}
+              source={{uri: lastVideoURI}}
+              style={styles.video}
+              onLoadStart={_onLoadStart}
+              onLoad={_onLoad}
+              onError={_onError}
+              onFullscreenUpdate={_onFullscreenUpdate}
+              onReadyForDisplay={_onReadyForDisplay}
+              useNativeControls
+              resizeMode={ResizeMode.CONTAIN}
+              isLooping={false}
+            />
+            <Image
+              style={{
+                height: 150,
+                width: 200,
+                backgroundColor: '#f0f0f0',
+                alignSelf: 'center',
+              }}
+              source={{uri: imgUri}}
+            />
+            <Image
+              style={{
+                height: 150,
+                width: 200,
+                backgroundColor: '#f0f0f0',
+                alignSelf: 'center',
+              }}
+              source={{uri: imgUri1}}
+            />
+          </View>
+        )}
+      </View>
+    );
+  }
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="HomePage">
+        <Stack.Screen name="HomePage" component={HomePage} />
+        <Stack.Screen name="camera" component={camera} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+function HomePage({navigation}) {
+  return (
+    <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+      <Text>Home Screen</Text>
+      <Button
+        title="Go to Details"
+        onPress={() => navigation.navigate('camera')}
+      />
     </View>
   );
 }
