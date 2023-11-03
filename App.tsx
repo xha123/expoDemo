@@ -48,6 +48,8 @@ import {zip} from 'react-native-zip-archive';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
 
+import CameraShow from './app/CameraShow';
+
 const Stack = createNativeStackNavigator();
 
 type SectionProps = PropsWithChildren<{
@@ -158,7 +160,7 @@ function App(): JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  function camera({navigation}) {
+  function Camera1({navigation}) {
     return (
       <View style={[backgroundStyle, styles.view]}>
         {openCamera ? (
@@ -212,7 +214,8 @@ function App(): JSX.Element {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="HomePage">
         <Stack.Screen name="HomePage" component={HomePage} />
-        <Stack.Screen name="camera" component={camera} />
+        <Stack.Screen name="Camera1" component={Camera1} />
+        <Stack.Screen name="CameraShow" component={CameraShow} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -225,6 +228,11 @@ function HomePage({navigation}) {
       <Button
         title="Go to Details"
         onPress={() => navigation.navigate('camera')}
+      />
+
+      <Button
+        title="Go to CameraShow"
+        onPress={() => navigation.navigate('CameraShow')}
       />
     </View>
   );
