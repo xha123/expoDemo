@@ -49,6 +49,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
 
 import CameraShow from './app/CameraShow';
+import WebViewShow from './app/WebViewShow';
 
 const Stack = createNativeStackNavigator();
 
@@ -160,6 +161,7 @@ function App(): JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   function Camera1({navigation}) {
     return (
       <View style={[backgroundStyle, styles.view]}>
@@ -216,6 +218,7 @@ function App(): JSX.Element {
         <Stack.Screen name="HomePage" component={HomePage} />
         <Stack.Screen name="Camera1" component={Camera1} />
         <Stack.Screen name="CameraShow" component={CameraShow} />
+        <Stack.Screen name="WebViewShow" component={WebViewShow} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -233,6 +236,11 @@ function HomePage({navigation}) {
       <Button
         title="Go to CameraShow"
         onPress={() => navigation.navigate('CameraShow')}
+      />
+
+      <Button
+        title="Go to WebView"
+        onPress={() => navigation.navigate('WebViewShow')}
       />
     </View>
   );
