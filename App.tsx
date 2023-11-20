@@ -51,6 +51,7 @@ import {NavigationContainer} from '@react-navigation/native';
 
 import CameraShow from './app/CameraShow';
 import WebViewShow from './app/WebViewShow';
+import CameraOne from './app/CameraOne';
 
 const Stack = createNativeStackNavigator();
 
@@ -217,6 +218,7 @@ function App(): JSX.Element {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="HomePage">
         <Stack.Screen name="HomePage" component={HomePage} />
+        <Stack.Screen name="CameraOne" component={CameraOne} />
         <Stack.Screen name="CameraShow" component={CameraShow} />
         <Stack.Screen
           name="WebViewShow"
@@ -242,6 +244,17 @@ function HomePage({navigation}) {
         title="Go to CameraShow"
         onPress={() => navigation.navigate('CameraShow')}
       />
+
+      <TouchableOpacity
+        style={{
+          marginTop: 10,
+          backgroundColor: 'white',
+          borderRadius: 5,
+          padding: 10,
+        }}
+        onPress={() => navigation.navigate('CameraOne')}>
+        <Text style={{fontSize: 16}}>CameraOne</Text>
+      </TouchableOpacity>
 
       <TouchableOpacity
         style={{
