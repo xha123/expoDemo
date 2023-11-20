@@ -21,6 +21,7 @@ import {
   TouchableOpacity,
   useColorScheme,
   View,
+  TextInput,
 } from 'react-native';
 
 import {
@@ -216,32 +217,96 @@ function App(): JSX.Element {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="HomePage">
         <Stack.Screen name="HomePage" component={HomePage} />
-        <Stack.Screen name="Camera1" component={Camera1} />
         <Stack.Screen name="CameraShow" component={CameraShow} />
-        <Stack.Screen name="WebViewShow" component={WebViewShow} />
+        <Stack.Screen
+          name="WebViewShow"
+          component={WebViewShow}
+          options={{headerShown: false}}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
 
 function HomePage({navigation}) {
+  const [weburl, setWebUrl] = useState('https://2q2421a685.zicp.fun');
+
+  const onChangeText = text => {
+    setWebUrl(text);
+  };
   return (
     <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
       <Text>Home Screen</Text>
-      <Button
-        title="Go to Details"
-        onPress={() => navigation.navigate('camera')}
-      />
 
       <Button
         title="Go to CameraShow"
         onPress={() => navigation.navigate('CameraShow')}
       />
 
-      <Button
-        title="Go to WebView"
-        onPress={() => navigation.navigate('WebViewShow')}
+      <TouchableOpacity
+        style={{
+          marginTop: 10,
+          backgroundColor: 'white',
+          borderRadius: 5,
+          padding: 10,
+        }}
+        onPress={() =>
+          navigation.navigate('WebViewShow', {
+            url: 'https://192.168.1.198:8080',
+          })
+        }>
+        <Text style={{fontSize: 16}}>在线设备 1</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={{
+          marginTop: 10,
+          backgroundColor: 'white',
+          borderRadius: 5,
+          padding: 10,
+        }}
+        onPress={() =>
+          navigation.navigate('WebViewShow', {
+            url: 'https://192.168.1.181:8080',
+          })
+        }>
+        <Text style={{fontSize: 16}}>在线设备 2</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={{
+          marginTop: 10,
+          backgroundColor: 'white',
+          borderRadius: 5,
+          padding: 10,
+        }}
+        onPress={() =>
+          navigation.navigate('WebViewShow', {
+            url: 'https://192.168.1.156:8080',
+          })
+        }>
+        <Text style={{fontSize: 16}}>在线设备 3</Text>
+      </TouchableOpacity>
+
+      <TextInput
+        style={{height: 40, borderColor: 'gray', borderWidth: 1}}
+        onChangeText={text => onChangeText(text)}
       />
+
+      <TouchableOpacity
+        style={{
+          marginTop: 10,
+          backgroundColor: 'white',
+          borderRadius: 5,
+          padding: 10,
+        }}
+        onPress={() =>
+          navigation.navigate('WebViewShow', {
+            url: weburl,
+          })
+        }>
+        <Text style={{fontSize: 16}}>链接在线设备 </Text>
+      </TouchableOpacity>
     </View>
   );
 }
