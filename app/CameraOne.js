@@ -15,6 +15,7 @@ import * as FileSystem from 'expo-file-system';
 import {Video as VideoAv, ResizeMode} from 'expo-av';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {FFmpegKit, ReturnCode} from 'ffmpeg-kit-react-native';
+import RNFS from 'react-native-fs';
 
 class CameraOne extends React.Component {
   constructor(props) {
@@ -117,21 +118,20 @@ class CameraOne extends React.Component {
   };
 
   fps = async () => {
-    const imgPath = `${
-      `${FileSystem.documentDirectory}ENT_FILE/image/` + Date.now()
-    }.jpg`;
+    const imgPath = 
+      `${FileSystem.documentDirectory}ENT_FILE/image/local/${Date.now()}.png`;
 
     const url =
-      'https://lan-storage.sdndc.cn/35/70/ab/67/7b/86930b8ea4f2cd4cad0ae5e53caae59b.mp4?e=-QpZge9bJXQqouVBj-ndbA&z=1700516043';
+      'https://lan-storage.sdndc.cn/35/70/ab/67/7b/86930b8ea4f2cd4cad0ae5e53caae59b.mp4?e=-S14kqnCScb_rEMzTSRKZw&z=1700575195';
 
-    this.getfps(url, imgPath, '00:00:01');
+    this.getfps(url, imgPath, '00:00:15.20');
   };
 
   /**
    * 通过视频截取视频帧
    * @param {视频地址} uri
    * @param {输出视频帧地址} imgPath
-   * @param {视频帧时间 00:00:01} time
+   * @param {视频帧时间 00:00:01.00} time
    */
   getfps = async (uri, imgPath, time) => {
     console.log('视频地址 ', uri);
@@ -139,7 +139,7 @@ class CameraOne extends React.Component {
     console.log('视频帧时间 ', time);
 
     FFmpegKit.executeAsync(
-      `-i ${uri} -ss ${time} -vframes 1  ${imgPath}`,
+      `-ss ${time} -i ${uri} -vframes 1  ${imgPath}`,
       async session => {
         const returnCode = await session.getReturnCode();
         console.log('视频帧 returnCode', returnCode);
